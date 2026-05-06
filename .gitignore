@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.env
+.envrc
+
+# Run artifacts
+*.jsonl
+*_summary.json
+results/
+runs/
+out/
+logs/
