@@ -1,3 +1,10 @@
+[![← qwen-bench hub](https://img.shields.io/badge/%E2%86%90-qwen--bench_hub-blueviolet?style=for-the-badge)](https://github.com/jcartu/qwen-bench)
+
+> Part of the [`qwen-bench`](https://github.com/jcartu/qwen-bench) ongoing benchmark series.
+> See the hub for the current SOTA leaderboard and a chronological index of all studies.
+
+---
+
 <div align="center">
 
 <img src="docs/images/hero.png" alt="LLM Stress Harness — diagnostic instrumentation for self-hosted inference" width="100%" />
