@@ -28,6 +28,26 @@ def extract_code(text: str) -> Optional[str]:
         return text.strip()
     return None
 
+def smart_glue_humaneval(code: str, prompt: str) -> str:
+    """If model returned body-only (no 'def'), prepend the prompt signature and
+    re-indent every body line to 4-space under the def. This fixes a long-standing
+    bug where '.strip()' would strip leading indent from line 1, causing the body
+    to be parsed as a top-level statement followed by indented continuations,
+    yielding IndentationError. See ADDENDUM.md in qwen-bench-2026-05-11-v2-followup.
+    """
+    if 'def ' in code:
+        return code
+    indent = '    '
+    fixed = []
+    for line in code.split('\n'):
+        if line.strip() == '':
+            fixed.append('')
+        elif line.startswith('    ') or line.startswith('\t'):
+            fixed.append(line)
+        else:
+            fixed.append(indent + line)
+    return prompt.rstrip() + '\n' + '\n'.join(fixed)
+
 def run_test(code: str, test_code: str, entry_point: str, timeout_s: int = 10) -> dict:
     """Run code + tests in a subprocess. Return {pass, error, stdout, stderr}."""
     full = f"{code}\n\n{test_code}\n\ncheck({entry_point})\n"
@@ -134,7 +154,7 @@ def build_humaneval_prompt(prob):
     p = prob['prompt']
     return [{
         "role": "user",
-        "content": f"Complete the following Python function. Output ONLY the function body inside a ```python fenced block, no explanation.\n\n```python\n{p}```",
+        "content": f"Complete the following Python function. Output the COMPLETE function (signature + body) inside a ```python fenced block. No explanation, just the code.\n\n```python\n{p}```",
     }]
 
 def build_mbpp_prompt(prob):
@@ -203,7 +223,9 @@ async def run_one(session, prob, benchmark, config_label, url, model, max_tokens
         # Run tests in process pool to avoid blocking event loop
         loop = asyncio.get_event_loop()
         if benchmark == "humaneval":
-            test_result = await loop.run_in_executor(None, run_test, code, prob['test'], prob['entry_point'])
+            glued = smart_glue_humaneval(code, prob['prompt'])
+            result.code_chars = len(glued)
+            test_result = await loop.run_in_executor(None, run_test, glued, prob['test'], prob['entry_point'])
         else:  # mbpp
             test_result = await loop.run_in_executor(None, run_mbpp_test, code, prob.get('test_list', []))
         

@@ -5,6 +5,9 @@
 
 ---
 
+> ⚠️ **2026-05-11 bug fix**: HumanEval extraction has been patched ([`smart_glue_humaneval`](harness/stress_harness.py)). Earlier versions deflated HE scores by 13–23 pp because `extract_code()` stripped leading indent from body-only model responses, producing `IndentationError`. The new prompt asks for the complete function, and a `smart_glue_humaneval()` helper repairs body-only responses by re-indenting. Re-run any HE comparisons against the patched harness; offline rescoring of old jsonls is straightforward (see [`harness/rescore_humaneval.py`](https://github.com/jcartu/qwen-bench-2026-05-11-v2-followup/blob/main/harness/rescore_humaneval.py)). Full bug analysis: [ADDENDUM.md](https://github.com/jcartu/qwen-bench-2026-05-11-v2-followup/blob/main/ADDENDUM.md).
+
+
 <div align="center">
 
 <img src="docs/images/hero.png" alt="LLM Stress Harness — diagnostic instrumentation for self-hosted inference" width="100%" />
